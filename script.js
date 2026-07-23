@@ -1007,3 +1007,39 @@ onAuthStateChanged(auth, async user => {
 });
 
 renderAll();
+
+async function startGoogleLogin() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  try {
+    if (isIOS || isSafari) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
+  } catch (error) {
+    console.error("Google login failed:", error);
+    const code = error?.code || "unknown";
+    alert(`Googleログインに失敗しました。\nエラー: ${code}`);
+  }
+}
+
+["loginBtn", "googleLoginBtn"].forEach(id => {
+  const oldButton = document.getElementById(id);
+  if (!oldButton) return;
+  const newButton = oldButton.cloneNode(true);
+  oldButton.replaceWith(newButton);
+  newButton.addEventListener("click", startGoogleLogin);
+});
+
+getRedirectResult(auth).catch(error => {
+  console.error("Google redirect result failed:", error);
+  const code = error?.code || "unknown";
+  if (code !== "auth/no-auth-event") {
+    alert(`Googleログインの完了処理に失敗しました。\nエラー: ${code}`);
+  }
+});
