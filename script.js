@@ -411,6 +411,17 @@ function renderJobOptions() {
     manage.appendChild(item);
   });
 
+  const presetJob = document.getElementById("presetJob");
+  if (presetJob) {
+    const currentValue = presetJob.value;
+    presetJob.innerHTML = data.jobs.length
+      ? data.jobs.map(job => `<option value="${job.id}">${job.name}</option>`).join("")
+      : `<option value="">先にバイト先を登録してください</option>`;
+    if (data.jobs.some(job => job.id === currentValue)) {
+      presetJob.value = currentValue;
+    }
+  }
+
   renderShiftJobChoices(document.getElementById("shiftJob")?.value || "");
 }
 
@@ -448,6 +459,7 @@ function fillJobForm(job) {
 }
 
 function openPresetModal(preset = null) {
+  renderJobOptions();
   if (!data.jobs.length) { alert("先にバイト先を登録してください。"); openJobModal(); return; }
   document.getElementById("presetForm").reset();
   document.getElementById("presetId").value = "";
@@ -546,6 +558,12 @@ function updatePreview() {
 }
 
 document.getElementById("presetForm").addEventListener("submit", e => {
+  const selectedPresetJob = document.getElementById("presetJob").value;
+  if (!selectedPresetJob) {
+    e.preventDefault();
+    alert("先にバイト先を登録してください。");
+    return;
+  }
   e.preventDefault();
   const id = document.getElementById("presetId").value || crypto.randomUUID();
   const preset = {
