@@ -198,7 +198,7 @@ function renderCalendar() {
         const chip = document.createElement("div");
         chip.className = "shift-chip";
         chip.style.background = job.color;
-        chip.innerHTML = `<b>${job.name}</b><span>${compactTime(shift.startTime)}-${compactTime(shift.endTime)}</span>`;
+        chip.innerHTML = `<b>${job.name}</b><span>${shift.startTime}-${shift.endTime}</span>`;
         chip.addEventListener("click", e => {
           e.stopPropagation();
           openShiftDetail(shift);
@@ -263,6 +263,7 @@ function renderSummary() {
 
 function renderShiftList() {
   const list = document.getElementById("shiftList");
+  if (!list) return;
   const shifts = monthShifts().sort((a, b) => `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`));
   list.innerHTML = "";
 
@@ -321,14 +322,18 @@ function renderPresetOptions() {
     const item = document.createElement("div");
     item.className = "manage-job";
     item.innerHTML = `<span><span class="color-dot" style="background:${job.color}"></span>${preset.name}（${preset.startTime}–${preset.endTime}）</span><button type="button" class="secondary">編集</button>`;
-    item.querySelector("button").addEventListener("click", () => fillPresetForm(preset));
+    item.querySelector("button").addEventListener("click", () => openPresetModal(preset));
     manage.appendChild(item);
   });
 
   const shiftList = document.getElementById("shiftPresetList");
-  shiftList.innerHTML = "";
-  data.presets.forEach(preset => shiftList.appendChild(createPresetButton(preset)));
-  if (!data.presets.length) shiftList.innerHTML = `<span class="field-note">プリセットを登録するとここに表示されます</span>`;
+  if (shiftList) {
+    shiftList.innerHTML = "";
+    data.presets.forEach(preset => shiftList.appendChild(createPresetButton(preset)));
+    if (!data.presets.length) {
+      shiftList.innerHTML = `<span class="field-note">プリセットを登録するとここに表示されます</span>`;
+    }
+  }
 }
 
 function createPresetButton(preset) {
