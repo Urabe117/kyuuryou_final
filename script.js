@@ -146,11 +146,9 @@ function monthShifts() {
 function renderAll() {
   renderCalendar();
   renderSummary();
-  renderShiftList();
   renderJobOptions();
   renderPaydayCalendar();
   renderPresetOptions();
-  document.getElementById("monthlyGoal").value = data.monthlyGoal || "";
 }
 
 function renderCalendar() {
@@ -192,7 +190,7 @@ function renderCalendar() {
         chip.className = "shift-chip";
         chip.style.background = job.color;
         const calc = calculateShift(shift);
-        chip.innerHTML = `<b>${job.name}</b><br><span>${shift.startTime}–${shift.endTime} ${yen(calc.total)}</span>`;
+        chip.innerHTML = `<b>${shift.startTime}–${shift.endTime}</b><span>${yen(calc.total)}</span>`;
         chip.addEventListener("click", e => {
           e.stopPropagation();
           openShiftModal(shift);
@@ -211,25 +209,11 @@ function renderSummary() {
     const calc = calculateShift(shift);
     acc.hours += calc.hours;
     acc.pay += calc.total;
-
     return acc;
   }, { hours: 0, pay: 0 });
 
   document.getElementById("totalHours").textContent = `${totals.hours.toFixed(1)}時間`;
   document.getElementById("totalPay").textContent = yen(totals.pay);
-
-  const goal = Number(data.monthlyGoal || 0);
-  const percent = goal > 0 ? Math.min(100, totals.pay / goal * 100) : 0;
-  document.getElementById("progressBar").style.width = `${percent}%`;
-
-  const goalText = document.getElementById("goalText");
-  if (!goal) {
-    goalText.textContent = "目標を設定すると進捗が表示されます";
-  } else if (totals.pay >= goal) {
-    goalText.textContent = `目標達成！ ${yen(totals.pay - goal)}上回っています`;
-  } else {
-    goalText.textContent = `目標まであと ${yen(goal - totals.pay)}（${percent.toFixed(0)}%）`;
-  }
 
   const grouped = {};
   shifts.forEach(shift => {
@@ -237,42 +221,34 @@ function renderSummary() {
     if (!job) return;
     const calc = calculateShift(shift);
     if (!grouped[job.id]) grouped[job.id] = {
-      job, days: new Set(), hours: 0, basePay: 0, extras: 0, total: 0
+      job, hours: 0, total: 0
     };
-    const row = grouped[job.id];
-    row.days.add(shift.date);
-    row.hours += calc.hours;
-    row.basePay += calc.basePay;
-    row.extras += calc.transport + Number(shift.bonus || 0) - Number(shift.deduction || 0);
-    row.total += calc.total;
+    grouped[job.id].hours += calc.hours;
+    grouped[job.id].total += calc.total;
   });
 
   const body = document.getElementById("summaryBody");
   body.innerHTML = "";
+
   Object.values(grouped).forEach(row => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="color-dot" style="background:${row.job.color}"></span>${row.job.name}</td>
-      <td>${row.days.size}日</td>
-      <td>${row.hours.toFixed(1)}時間</td>
-      <td>${yen(row.basePay)}</td>
-      <td>${yen(row.extras)}</td>
       <td><strong>${yen(row.total)}</strong></td>
+      <td>${row.hours.toFixed(1)}時間</td>
     `;
     body.appendChild(tr);
   });
 
   if (!Object.keys(grouped).length) {
-    body.innerHTML = `<tr><td colspan="6" class="empty">この月の勤務記録はありません</td></tr>`;
+    body.innerHTML = `<tr><td colspan="3" class="empty">この月の勤務はありません</td></tr>`;
   }
 
   document.getElementById("summaryFoot").innerHTML = `
     <tr>
       <td>全部の合計</td>
-      <td>${new Set(shifts.map(s => s.date)).size}日</td>
-      <td>${totals.hours.toFixed(1)}時間</td>
-      <td colspan="2"></td>
       <td>${yen(totals.pay)}</td>
+      <td>${totals.hours.toFixed(1)}時間</td>
     </tr>
   `;
 }
@@ -613,11 +589,6 @@ document.getElementById("deleteShiftBtn").addEventListener("click", () => {
   document.getElementById(id).addEventListener("input", updatePreview);
 });
 
-document.getElementById("monthlyGoal").addEventListener("input", e => {
-  data.monthlyGoal = Number(e.target.value || 0);
-  saveData();
-  renderSummary();
-});
 
 document.getElementById("prevMonthBtn").addEventListener("click", () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
@@ -669,37 +640,6 @@ document.getElementById("restoreInput").addEventListener("change", async e => {
   e.target.value = "";
 });
 
-document.getElementById("exportCsvBtn").addEventListener("click", () => {
-  const rows = [["日付","バイト先","開始","終了","休憩分","労働時間","給料","メモ"]];
-  monthShifts()
-    .sort((a,b) => `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`))
-    .forEach(shift => {
-      const job = getJob(shift.jobId);
-      const calc = calculateShift(shift);
-      rows.push([
-        shift.date,
-        job?.name || "",
-        shift.startTime,
-        shift.endTime,
-        shift.breakMinutes || 0,
-        calc.hours.toFixed(2),
-        Math.round(calc.total),
-        shift.memo || ""
-      ]);
-    });
-
-  const csv = "\uFEFF" + rows.map(row =>
-    row.map(value => `"${String(value).replaceAll('"','""')}"`).join(",")
-  ).join("\n");
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `salary-${currentDate.getFullYear()}-${pad(currentDate.getMonth()+1)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
 
 
 let paydayDate = new Date(); paydayDate.setDate(1);
@@ -756,7 +696,7 @@ function renderPaydayCalendar() {
     const day=new Date(start); day.setDate(start.getDate()+i); const key=dateKey(day);
     const cell=document.createElement("div"); cell.className="day"; if(day.getMonth()!==paydayDate.getMonth()) cell.classList.add("outside");
     cell.innerHTML=`<div class="day-number">${day.getDate()}</div>`;
-    entries.filter(e=>e.date===key).forEach(e=>{ const chip=document.createElement("div"); chip.className="shift-chip payday-chip"; chip.style.background=e.job.color; chip.innerHTML=`<b>${e.job.name}</b><br><span>${yen(e.total)}</span>`; cell.appendChild(chip); });
+    entries.filter(e=>e.date===key).forEach(e=>{ const chip=document.createElement("div"); chip.className="shift-chip payday-chip"; chip.style.background=e.job.color; chip.innerHTML=`<b>${e.job.name}</b><span>${yen(e.total)}</span>`; cell.appendChild(chip); });
     cal.appendChild(cell);
   }
   const list=document.getElementById("paydayList"); list.innerHTML="";

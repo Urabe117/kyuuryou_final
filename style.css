@@ -345,3 +345,205 @@ label { display: grid; gap: 7px; font-weight: 700; }
 .login-card small { display:block; margin-top:14px; color:#6b7280; }
 .sync-ok { color:#166534 !important; }
 .sync-error { color:#b91c1c !important; }
+
+
+/* スマホ版：カレンダー内の勤務ラベルを横長・1行表示にする */
+.shift-chip b {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 520px) {
+  .day {
+    min-height: 72px;
+    padding: 4px;
+  }
+
+  .day-number {
+    margin-bottom: 3px;
+  }
+
+  .shift-chip {
+    width: 100%;
+    min-height: 0;
+    margin-bottom: 3px;
+    padding: 3px 5px;
+    border-radius: 6px;
+    font-size: 9px;
+    line-height: 1.15;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .shift-chip b {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .shift-chip br,
+  .shift-chip span {
+    display: none;
+  }
+}
+
+
+/* ===== スマホ操作・表示改善 v2 ===== */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+main, section, .calendar-card, .table-card, .table-wrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.table-wrap {
+  overflow-x: hidden;
+}
+
+table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+th, td {
+  overflow-wrap: anywhere;
+}
+
+th:first-child, td:first-child { width: 42%; }
+th:nth-child(2), td:nth-child(2) { width: 33%; }
+th:nth-child(3), td:nth-child(3) { width: 25%; }
+
+dialog {
+  max-width: calc(100vw - 20px);
+  overflow-x: hidden;
+}
+
+dialog form {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+dialog input,
+dialog select,
+dialog textarea,
+dialog label,
+dialog .two-cols,
+dialog .manage-list,
+dialog .manage-job,
+dialog .preset-buttons,
+dialog .color-palette {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.manage-job > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.shift-chip {
+  display: grid;
+  gap: 2px;
+}
+
+.shift-chip b,
+.shift-chip span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.shift-chip span {
+  font-weight: 800;
+}
+
+.payday-chip span {
+  display: block !important;
+}
+
+@media (max-width: 520px) {
+  main {
+    width: min(100% - 12px, 1200px);
+  }
+
+  .table-card {
+    padding: 12px 10px;
+  }
+
+  .table-card .section-title-row {
+    align-items: center;
+  }
+
+  .table-card h2 {
+    font-size: 23px;
+  }
+
+  th, td {
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+
+  th:first-child, td:first-child { width: 39%; }
+  th:nth-child(2), td:nth-child(2) { width: 35%; }
+  th:nth-child(3), td:nth-child(3) { width: 26%; }
+
+  .shift-chip {
+    padding: 3px 4px;
+    font-size: 8px;
+    line-height: 1.1;
+  }
+
+  .shift-chip b,
+  .shift-chip span {
+    display: block !important;
+  }
+
+  .shift-chip b {
+    font-size: 8px;
+  }
+
+  .shift-chip span {
+    font-size: 8px;
+  }
+
+  .payday-chip b {
+    font-size: 8px;
+  }
+
+  .payday-chip span {
+    font-size: 8px;
+  }
+
+  dialog {
+    width: calc(100vw - 16px);
+    margin-inline: auto;
+  }
+
+  dialog form {
+    padding: 16px 14px;
+  }
+
+  dialog .two-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .color-palette {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .preset-button {
+    max-width: 100%;
+    min-width: 0;
+  }
+}

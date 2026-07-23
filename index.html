@@ -45,17 +45,6 @@
       </article>
     </section>
 
-    <section class="goal-card">
-      <div>
-        <label for="monthlyGoal">月収目標</label>
-        <input id="monthlyGoal" type="number" min="0" step="1000" placeholder="150000" />
-      </div>
-      <div class="goal-progress">
-        <div class="progress-track"><div id="progressBar"></div></div>
-        <p id="goalText">目標を設定すると進捗が表示されます</p>
-      </div>
-    </section>
-
     <section class="calendar-card">
       <div class="calendar-header">
         <button id="prevMonthBtn" class="icon-btn">‹</button>
@@ -82,11 +71,8 @@
           <thead>
             <tr>
               <th>バイト先</th>
-              <th>出勤日数</th>
+              <th>合計金額</th>
               <th>労働時間</th>
-              <th>基本給</th>
-              <th>交通費等</th>
-              <th>合計</th>
             </tr>
           </thead>
           <tbody id="summaryBody"></tbody>
@@ -95,13 +81,6 @@
       </div>
     </section>
 
-    <section class="table-card">
-      <div class="section-title-row">
-        <h2>勤務記録</h2>
-        <button id="exportCsvBtn" class="secondary">CSV出力</button>
-      </div>
-      <div id="shiftList" class="shift-list"></div>
-    </section>
     </section>
 
     <section id="paydayView" class="hidden">
