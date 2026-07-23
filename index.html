@@ -180,24 +180,26 @@
     </form>
   </dialog>
 
-  <dialog id="shiftModal">
+  <dialog id="shiftModal" class="shift-dialog">
     <form id="shiftForm" method="dialog">
       <div class="modal-header">
         <h2>勤務を登録</h2>
         <button type="button" class="close-btn" data-close="shiftModal">×</button>
       </div>
+
       <input type="hidden" id="shiftId" />
+      <input type="hidden" id="shiftJob" />
+
       <label>日付
         <input id="shiftDate" type="date" required />
       </label>
+
       <div>
-        <label>プリセットを押すと、この日付に即登録されます</label>
-        <div id="shiftPresetList" class="preset-buttons compact"></div>
+        <label>バイト先</label>
+        <div id="shiftJobChoices" class="job-choice-grid" role="radiogroup" aria-label="バイト先"></div>
       </div>
-      <label>バイト先
-        <select id="shiftJob" required></select>
-      </label>
-      <div class="two-cols">
+
+      <div class="time-row">
         <label>開始時刻
           <input id="startTime" type="time" required />
         </label>
@@ -205,26 +207,28 @@
           <input id="endTime" type="time" required />
         </label>
       </div>
+
       <label>休憩（分）
-        <input id="breakMinutes" type="number" min="0" value="0" />
+        <input id="breakMinutes" type="number" min="0" value="0" inputmode="numeric" />
       </label>
-      <div class="two-cols">
-        <label>手当・ボーナス
-          <input id="bonus" type="number" min="0" value="0" />
-        </label>
-        <label>控除
-          <input id="deduction" type="number" min="0" value="0" />
-        </label>
-      </div>
-      <label>メモ
-        <textarea id="shiftMemo" rows="3" maxlength="100"></textarea>
-      </label>
+
       <div id="calcPreview" class="calc-preview">勤務時間と給料がここに表示されます</div>
+
       <div class="modal-actions">
         <button type="button" id="deleteShiftBtn" class="danger hidden">削除</button>
         <button type="submit">保存</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="paydayDetailModal" class="detail-dialog">
+    <div class="detail-dialog-inner">
+      <div class="modal-header">
+        <h2 id="paydayDetailTitle">給料日の詳細</h2>
+        <button type="button" class="close-btn" data-close="paydayDetailModal">×</button>
+      </div>
+      <div id="paydayDetailBody" class="payday-detail-body"></div>
+    </div>
   </dialog>
 
   <div id="loginOverlay" class="login-overlay">
