@@ -208,7 +208,14 @@ function renderCalendar() {
         const chip = document.createElement("div");
         chip.className = "shift-chip";
         chip.style.background = job.color;
-        chip.innerHTML = `<b>${job.name}</b><span>${shift.startTime}-${shift.endTime}</span>`;
+        chip.innerHTML = `
+          <b>${job.name}</b>
+          <span class="shift-time-vertical">
+            <span>${shift.startTime}</span>
+            <i></i>
+            <span>${shift.endTime}</span>
+          </span>
+        `;
         chip.addEventListener("click", e => {
           e.stopPropagation();
           openShiftDetail(shift);
@@ -509,11 +516,19 @@ function openShiftDetail(shift) {
         <span class="color-dot" style="background:${job.color}"></span>
         <strong>${job.name}</strong>
       </div>
-      <div class="shift-detail-grid">
-        <div><span>開始時刻</span><strong>${shift.startTime}</strong></div>
-        <div><span>終了時刻</span><strong>${shift.endTime}</strong></div>
-        <div><span>労働時間</span><strong>${calc.hours.toFixed(1)}時間</strong></div>
-        <div><span>給料</span><strong>${yen(calc.total)}</strong></div>
+      <div class="shift-detail-list">
+        <div>
+          <span>時刻</span>
+          <strong>${shift.startTime}-${shift.endTime}</strong>
+        </div>
+        <div>
+          <span>労働時間</span>
+          <strong>${calc.hours.toFixed(1)}時間</strong>
+        </div>
+        <div>
+          <span>給料</span>
+          <strong>${yen(calc.total)}</strong>
+        </div>
       </div>
     </div>
   `;

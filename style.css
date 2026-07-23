@@ -1098,3 +1098,108 @@ dialog input[type="time"] {
     text-overflow: clip;
   }
 }
+
+
+/* ===== v9: カレンダーと勤務詳細の表示調整 ===== */
+.shift-chip {
+  text-align: center;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.shift-chip b,
+.shift-chip span {
+  font-weight: 600 !important;
+}
+
+.shift-chip b {
+  font-size: 7px !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shift-time-vertical {
+  display: grid !important;
+  justify-items: center;
+  gap: 1px;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.2px;
+}
+
+.shift-time-vertical > span {
+  display: block !important;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.shift-time-vertical i {
+  display: block;
+  width: 1px;
+  height: 6px;
+  background: currentColor;
+  opacity: .85;
+}
+
+.shift-detail-list {
+  display: grid;
+  gap: 10px;
+}
+
+.shift-detail-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.shift-detail-list span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.shift-detail-list strong {
+  font-size: 18px;
+}
+
+#shiftDetailModal .modal-actions {
+  margin-top: 22px;
+}
+
+#shiftDetailModal .modal-actions button {
+  min-width: 110px;
+}
+
+@media (max-width: 520px) {
+  .shift-chip b {
+    font-size: 6px !important;
+  }
+
+  .shift-time-vertical {
+    font-size: 7px !important;
+  }
+
+  .shift-time-vertical i {
+    height: 5px;
+  }
+
+  .shift-detail-list > div {
+    padding: 11px 12px;
+  }
+
+  .shift-detail-list strong {
+    font-size: 17px;
+  }
+
+  #shiftDetailModal .modal-actions {
+    margin-top: 20px;
+  }
+}
