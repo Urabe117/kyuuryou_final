@@ -886,19 +886,26 @@ initDaySelects();
 
 
 async function loginWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
   try {
     setSyncStatus("ログイン中…");
-    await signInWithPopup(auth, googleProvider);
+
+    if (isIOS || isSafari) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   } catch (error) {
-    if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(error.code)) {
-      await signInWithRedirect(auth, googleProvider);
-      return;
-    }
-    if (error.code !== "auth/popup-closed-by-user") {
-      console.error(error);
-      alert(`ログインできませんでした。${error.code || ""}`);
-      setSyncStatus("ログインに失敗しました", "sync-error");
-    }
+    console.error("Google login failed:", error);
+    const code = error?.code || "unknown";
+    alert(`Googleログインに失敗しました。
+エラー: ${code}`);
+    setSyncStatus(`ログイン失敗: ${code}`, "sync-error");
   }
 }
 
@@ -966,11 +973,17 @@ async function connectUserCloud(user) {
   );
 }
 
-document.getElementById("loginBtn").addEventListener("click", loginWithGoogle);
-document.getElementById("overlayLoginBtn").addEventListener("click", loginWithGoogle);
+document.getElementById("loginBtn")?.addEventListener("click", loginWithGoogle);
+document.getElementById("overlayLoginBtn")?.addEventListener("click", loginWithGoogle);
 document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
-getRedirectResult(auth).catch(console.error);
+getRedirectResult(auth).catch(error => {
+  console.error("Google redirect result failed:", error);
+  const code = error?.code || "unknown";
+  if (code !== "auth/no-auth-event") {
+    alert(`Googleログインの完了処理に失敗しました。\nエラー: ${code}`);
+  }
+});
 onAuthStateChanged(auth, async user => {
   currentUser = user;
   const overlay = document.getElementById("loginOverlay");
@@ -1008,38 +1021,3 @@ onAuthStateChanged(auth, async user => {
 
 renderAll();
 
-async function startGoogleLogin() {
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-  try {
-    if (isIOS || isSafari) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-  } catch (error) {
-    console.error("Google login failed:", error);
-    const code = error?.code || "unknown";
-    alert(`Googleログインに失敗しました。\nエラー: ${code}`);
-  }
-}
-
-["loginBtn", "googleLoginBtn"].forEach(id => {
-  const oldButton = document.getElementById(id);
-  if (!oldButton) return;
-  const newButton = oldButton.cloneNode(true);
-  oldButton.replaceWith(newButton);
-  newButton.addEventListener("click", startGoogleLogin);
-});
-
-getRedirectResult(auth).catch(error => {
-  console.error("Google redirect result failed:", error);
-  const code = error?.code || "unknown";
-  if (code !== "auth/no-auth-event") {
-    alert(`Googleログインの完了処理に失敗しました。\nエラー: ${code}`);
-  }
-});
