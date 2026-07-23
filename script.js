@@ -198,10 +198,10 @@ function renderCalendar() {
         const chip = document.createElement("div");
         chip.className = "shift-chip";
         chip.style.background = job.color;
-        chip.innerHTML = `<b>${compactTime(shift.startTime)}-${compactTime(shift.endTime)}</b>`;
+        chip.innerHTML = `<b>${job.name}</b><span>${compactTime(shift.startTime)}-${compactTime(shift.endTime)}</span>`;
         chip.addEventListener("click", e => {
           e.stopPropagation();
-          openShiftModal(shift);
+          openShiftDetail(shift);
         });
         cell.appendChild(chip);
       });
@@ -466,6 +466,31 @@ function fillPresetForm(preset) {
   document.getElementById("presetEnd").value = preset.endTime;
   document.getElementById("presetBreak").value = preset.breakMinutes || 0;
   document.getElementById("deletePresetBtn").classList.remove("hidden");
+}
+
+let detailShiftId = null;
+
+function openShiftDetail(shift) {
+  const job = getJob(shift.jobId);
+  if (!job) return;
+
+  detailShiftId = shift.id;
+  const calc = calculateShift(shift);
+  document.getElementById("shiftDetailBody").innerHTML = `
+    <div class="shift-detail-card">
+      <div class="shift-detail-job">
+        <span class="color-dot" style="background:${job.color}"></span>
+        <strong>${job.name}</strong>
+      </div>
+      <div class="shift-detail-grid">
+        <div><span>開始時刻</span><strong>${shift.startTime}</strong></div>
+        <div><span>終了時刻</span><strong>${shift.endTime}</strong></div>
+        <div><span>労働時間</span><strong>${calc.hours.toFixed(1)}時間</strong></div>
+        <div><span>給料</span><strong>${yen(calc.total)}</strong></div>
+      </div>
+    </div>
+  `;
+  document.getElementById("shiftDetailModal").showModal();
 }
 
 function openShiftModal(shift = null, selectedDate = null) {
@@ -752,16 +777,18 @@ function renderPaydayCalendar() {
     cell.innerHTML = `<div class="day-number">${day.getDate()}</div>`;
 
     if (dayEntries.length) {
-      const total = dayEntries.reduce((sum, entry) => sum + entry.total, 0);
-      const marker = document.createElement("button");
-      marker.type = "button";
-      marker.className = "payday-marker";
-      marker.textContent = yen(total);
-      marker.addEventListener("click", event => {
-        event.stopPropagation();
-        openPaydayDetail(key, dayEntries);
+      dayEntries.forEach(entry => {
+        const marker = document.createElement("button");
+        marker.type = "button";
+        marker.className = "payday-marker";
+        marker.style.background = entry.job.color;
+        marker.innerHTML = `<span>${entry.job.name}</span><strong>${yen(entry.total)}</strong>`;
+        marker.addEventListener("click", event => {
+          event.stopPropagation();
+          openPaydayDetail(key, [entry]);
+        });
+        cell.appendChild(marker);
       });
-      cell.appendChild(marker);
       cell.addEventListener("click", () => openPaydayDetail(key, dayEntries));
     }
 
@@ -793,6 +820,13 @@ function renderPaydayCalendar() {
     list.innerHTML = '<div class="empty">この月に入る給料はありません</div>';
   }
 }
+
+document.getElementById("editShiftFromDetailBtn").addEventListener("click", () => {
+  const shift = data.shifts.find(item => item.id === detailShiftId);
+  if (!shift) return;
+  document.getElementById("shiftDetailModal").close();
+  openShiftModal(shift);
+});
 
 document.getElementById("workTabBtn").addEventListener("click",()=>{document.getElementById("workView").classList.remove("hidden");document.getElementById("paydayView").classList.add("hidden");document.getElementById("workTabBtn").classList.add("active");document.getElementById("paydayTabBtn").classList.remove("active");});
 document.getElementById("paydayTabBtn").addEventListener("click",()=>{document.getElementById("workView").classList.add("hidden");document.getElementById("paydayView").classList.remove("hidden");document.getElementById("paydayTabBtn").classList.add("active");document.getElementById("workTabBtn").classList.remove("active");renderPaydayCalendar();});

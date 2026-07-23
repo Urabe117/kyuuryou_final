@@ -734,3 +734,136 @@ dialog .color-palette {
     font-size: 8px;
   }
 }
+
+
+/* ===== 画面改善 v4 ===== */
+.shift-dialog {
+  width: min(540px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  margin-inline: auto;
+}
+
+.shift-dialog form {
+  width: 100%;
+  max-width: 100%;
+  padding: 18px;
+  overflow-x: clip;
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  align-items: end;
+}
+
+.time-row label,
+.time-row input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.shift-chip {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.shift-chip b,
+.shift-chip span {
+  display: block !important;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.shift-chip b { font-weight: 800; }
+.shift-chip span { font-weight: 700; }
+
+.shift-detail-body { margin-top: 16px; }
+.shift-detail-card { display: grid; gap: 16px; }
+.shift-detail-job {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+}
+.shift-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.shift-detail-grid > div {
+  display: grid;
+  gap: 5px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f9fafb;
+}
+.shift-detail-grid span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.payday-marker {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  margin-bottom: 3px;
+  padding: 4px 3px;
+  color: #fff;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.payday-marker span,
+.payday-marker strong {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.payday-marker span {
+  font-size: 8px;
+  font-weight: 700;
+}
+.payday-marker strong {
+  font-size: 9px;
+}
+
+@media (max-width: 520px) {
+  .shift-dialog {
+    width: calc(100vw - 10px);
+    max-width: calc(100vw - 10px);
+  }
+  .shift-dialog form {
+    padding: 14px 10px;
+  }
+  .time-row {
+    gap: 4px;
+  }
+  .time-row input {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .shift-chip {
+    padding: 3px 4px;
+    text-align: left;
+  }
+  .shift-chip b,
+  .shift-chip span {
+    font-size: 8px;
+    line-height: 1.05;
+  }
+  .payday-marker {
+    padding: 3px 2px;
+  }
+  .payday-marker span {
+    font-size: 7px;
+  }
+  .payday-marker strong {
+    font-size: 8px;
+  }
+}
