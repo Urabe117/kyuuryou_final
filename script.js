@@ -29,6 +29,16 @@ let applyingCloudData = false;
 
 const STORAGE_KEY = "salaryCalendarDataV1";
 
+const safeClone = value => JSON.parse(JSON.stringify(value));
+
+function sanitizeForFirestore(value) {
+  return JSON.parse(JSON.stringify(value, (_key, item) => {
+    if (typeof item === "number" && !Number.isFinite(item)) return 0;
+    return item;
+  }));
+}
+
+
 const defaultData = {
   jobs: [],
   shifts: [],
@@ -63,9 +73,9 @@ const compactTime = value => {
 function loadData() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved ? { ...structuredClone(defaultData), ...saved } : structuredClone(defaultData);
+    return saved ? { ...safeClone(defaultData), ...saved } : safeClone(defaultData);
   } catch {
-    return structuredClone(defaultData);
+    return safeClone(defaultData);
   }
 }
 
@@ -878,37 +888,67 @@ async function loginWithGoogle() {
 }
 
 async function connectUserCloud(user) {
+  if (!user?.uid) {
+    throw new Error("ログインユーザー情報を取得できませんでした。");
+  }
+
   if (unsubscribeCloud) unsubscribeCloud();
+
   const userRef = doc(db, "users", user.uid);
-  const first = await getDoc(userRef);
-  const localSaved = localStorage.getItem(STORAGE_KEY);
+  let first;
+
+  try {
+    first = await getDoc(userRef);
+  } catch (error) {
+    console.error("Firestore read failed:", error);
+    throw error;
+  }
 
   if (!first.exists()) {
-    await setDoc(userRef, { data, updatedAt: serverTimestamp() });
+    const cleanData = sanitizeForFirestore(data);
+    try {
+      await setDoc(
+        userRef,
+        {
+          data: cleanData,
+          updatedAt: serverTimestamp()
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Firestore initial write failed:", error);
+      throw error;
+    }
   } else {
     const cloud = first.data()?.data;
-    if (cloud) {
+    if (cloud && typeof cloud === "object") {
       applyingCloudData = true;
-      data = { ...structuredClone(defaultData), ...cloud };
+      data = { ...safeClone(defaultData), ...cloud };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       renderAll();
       applyingCloudData = false;
     }
   }
 
-  unsubscribeCloud = onSnapshot(userRef, snap => {
-    const cloud = snap.data()?.data;
-    if (!cloud) return;
-    applyingCloudData = true;
-    data = { ...structuredClone(defaultData), ...cloud };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    renderAll();
-    applyingCloudData = false;
-    setSyncStatus("同期済み", "sync-ok");
-  }, error => {
-    console.error(error);
-    setSyncStatus("同期エラー", "sync-error");
-  });
+  unsubscribeCloud = onSnapshot(
+    userRef,
+    snap => {
+      const cloud = snap.data()?.data;
+      if (!cloud || typeof cloud !== "object") return;
+
+      applyingCloudData = true;
+      data = { ...safeClone(defaultData), ...cloud };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderAll();
+      applyingCloudData = false;
+      setSyncStatus("同期済み", "sync-ok");
+    },
+    error => {
+      console.error("Firestore snapshot failed:", error);
+      const code = error?.code || "unknown";
+      setSyncStatus(`同期エラー: ${code}`, "sync-error");
+    }
+  );
 }
 
 document.getElementById("loginBtn").addEventListener("click", loginWithGoogle);
@@ -944,8 +984,10 @@ onAuthStateChanged(auth, async user => {
     await connectUserCloud(user);
   } catch (error) {
     console.error(error);
-    alert("Firebaseへの接続に失敗しました。Firestoreのルールと承認済みドメインを確認してください。");
-    setSyncStatus("接続に失敗しました", "sync-error");
+    const code = error?.code || "unknown";
+    const message = error?.message || "詳細不明";
+    alert(`Firebaseへの接続に失敗しました。\nエラー: ${code}\n${message}`);
+    setSyncStatus(`接続失敗: ${code}`, "sync-error");
   }
 });
 
