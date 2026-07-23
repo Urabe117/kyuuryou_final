@@ -1236,3 +1236,40 @@ dialog input[type="time"] {
     height: 5px;
   }
 }
+
+.back-to-today,.today-link,.today-btn{display:none !important;}
+
+
+/* v12: ベースカラーを落ち着いたグレーへ */
+:root{
+  --primary:#6b7280;
+  --primary-dark:#4b5563;
+  --primary-light:#e5e7eb;
+  --accent:#9ca3af;
+}
+
+/* 紫系をベースグレーへ */
+button:not(.store-origin):not(.store-banban):not(.store-kushikatsu),
+.btn-primary,
+.header-button,
+.calendar-nav,
+.fab,
+.primary{
+  background:var(--primary)!important;
+  border-color:var(--primary)!important;
+  color:#fff!important;
+}
+
+button:hover,
+.btn-primary:hover{
+  background:var(--primary-dark)!important;
+}
+
+.current-day,
+.selected{
+  outline-color:var(--primary)!important;
+}
+
+.progress-fill{
+  background:var(--primary)!important;
+}
